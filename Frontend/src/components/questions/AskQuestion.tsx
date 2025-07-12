@@ -9,6 +9,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import RichTextEditor from '@/components/ui/RichTextEditor';
 import { generatePseudonym } from '@/utils/pseudonym';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface AskQuestionProps {
   onBack?: () => void;
@@ -21,6 +22,7 @@ const AskQuestion = ({ onBack }: AskQuestionProps) => {
   const [newTag, setNewTag] = useState('');
   const [isAnonymous, setIsAnonymous] = useState(false);
   const { toast } = useToast();
+  const { user, addQuestion, addNotification } = useAuth();
 
   const availableTags = ['react', 'javascript', 'typescript', 'css', 'html', 'nodejs', 'python', 'sql'];
 
@@ -36,8 +38,26 @@ const AskQuestion = ({ onBack }: AskQuestionProps) => {
   };
 
   const handleSubmit = () => {
-    if (isValid) {
+    if (isValid && user) {
       const pseudonym = isAnonymous ? generatePseudonym() : null;
+      
+      const questionData = {
+        id: '', // Will be set in addQuestion
+        title,
+        description,
+        tags,
+        author: {
+          name: isAnonymous ? pseudonym || 'Anonymous' : user.name,
+          avatar: '',
+          initials: isAnonymous ? (pseudonym?.charAt(0) || 'A') : user.initials
+        },
+        votes: 0,
+        answers: 0,
+        timeAgo: 'Just now',
+        isAnonymous,
+        pseudonym: pseudonym || undefined
+      };
+
       console.log('Submitting question:', { 
         title, 
         description, 
@@ -45,6 +65,12 @@ const AskQuestion = ({ onBack }: AskQuestionProps) => {
         isAnonymous,
         pseudonym
       });
+
+      // Add question to global state for real-time updates
+      addQuestion(questionData);
+      
+      // Add to user's recent activity
+      addNotification(`You asked: "${title}"`);
       
       toast({
         title: "Question submitted",
@@ -58,6 +84,9 @@ const AskQuestion = ({ onBack }: AskQuestionProps) => {
       setDescription('');
       setTags([]);
       setIsAnonymous(false);
+      
+      // Go back to home page
+      onBack?.();
     }
   };
 

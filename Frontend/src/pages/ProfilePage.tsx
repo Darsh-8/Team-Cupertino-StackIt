@@ -10,7 +10,7 @@ interface ProfilePageProps {
 }
 
 const ProfilePage = ({ onBack }: ProfilePageProps) => {
-  const { user, logout } = useAuth();
+  const { user, logout, notifications } = useAuth();
 
   if (!user) {
     return (
@@ -22,6 +22,9 @@ const ProfilePage = ({ onBack }: ProfilePageProps) => {
       </div>
     );
   }
+
+  // Get recent activity from notifications
+  const recentActivity = notifications.slice(0, 5);
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 space-y-8">
@@ -83,29 +86,23 @@ const ProfilePage = ({ onBack }: ProfilePageProps) => {
       <Card className="p-6">
         <h2 className="text-xl font-semibold text-gray-900 mb-4">Recent Activity</h2>
         <div className="space-y-4">
-          <div className="flex items-center justify-between py-3 border-b border-gray-200">
-            <div>
-              <div className="font-medium text-gray-900">Answered a question</div>
-              <div className="text-sm text-gray-600">How to implement authentication in React?</div>
+          {recentActivity.length > 0 ? (
+            recentActivity.map((activity, index) => (
+              <div key={activity.id || index} className="flex items-center justify-between py-3 border-b border-gray-200 last:border-b-0">
+                <div>
+                  <div className="font-medium text-gray-900">Activity</div>
+                  <div className="text-sm text-gray-600">{activity.message}</div>
+                </div>
+                <Badge variant="secondary">
+                  {new Date(activity.timestamp).toLocaleDateString()}
+                </Badge>
+              </div>
+            ))
+          ) : (
+            <div className="text-center py-8">
+              <p className="text-gray-500">No recent activity to display.</p>
             </div>
-            <Badge variant="secondary">2 hours ago</Badge>
-          </div>
-          
-          <div className="flex items-center justify-between py-3 border-b border-gray-200">
-            <div>
-              <div className="font-medium text-gray-900">Asked a question</div>
-              <div className="text-sm text-gray-600">Best practices for state management</div>
-            </div>
-            <Badge variant="secondary">1 day ago</Badge>
-          </div>
-          
-          <div className="flex items-center justify-between py-3">
-            <div>
-              <div className="font-medium text-gray-900">Upvoted an answer</div>
-              <div className="text-sm text-gray-600">JavaScript async/await explanation</div>
-            </div>
-            <Badge variant="secondary">3 days ago</Badge>
-          </div>
+          )}
         </div>
       </Card>
 

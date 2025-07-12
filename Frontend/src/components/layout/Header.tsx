@@ -5,15 +5,17 @@ import { Input } from '@/components/ui/input';
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import LoginDialog from '@/components/auth/LoginDialog';
+import NotificationDropdown from '@/components/ui/NotificationDropdown';
 
 interface HeaderProps {
   onAskQuestion?: () => void;
   onSearch?: (query: string) => void;
   onProfileClick?: () => void;
   onAdminClick?: () => void;
+  onHomeClick?: () => void;
 }
 
-const Header = ({ onAskQuestion, onSearch, onProfileClick, onAdminClick }: HeaderProps) => {
+const Header = ({ onAskQuestion, onSearch, onProfileClick, onAdminClick, onHomeClick }: HeaderProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showLoginDialog, setShowLoginDialog] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -31,6 +33,10 @@ const Header = ({ onAskQuestion, onSearch, onProfileClick, onAdminClick }: Heade
     onSearch?.(query);
   };
 
+  const handleLogoClick = () => {
+    onHomeClick?.();
+  };
+
   // Check if user is admin
   const isAdmin = user?.isAdmin || user?.email === 'admin@xyz.in';
 
@@ -41,7 +47,12 @@ const Header = ({ onAskQuestion, onSearch, onProfileClick, onAdminClick }: Heade
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <div className="flex items-center">
-              <h1 className="text-2xl font-bold text-gray-900">StackIt</h1>
+              <h1 
+                className="text-2xl font-bold text-gray-900 cursor-pointer hover:text-blue-600 transition-colors"
+                onClick={handleLogoClick}
+              >
+                StackIt
+              </h1>
               {isAdmin && (
                 <div className="ml-3 flex items-center space-x-1 bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium">
                   <Shield className="h-3 w-3" />
@@ -66,6 +77,8 @@ const Header = ({ onAskQuestion, onSearch, onProfileClick, onAdminClick }: Heade
 
             {/* Desktop Actions */}
             <div className="hidden md:flex items-center space-x-3">
+              {isLoggedIn && <NotificationDropdown />}
+              
               <Button 
                 onClick={onAskQuestion}
                 className="bg-black text-white hover:bg-gray-900 rounded-full px-4 py-2 font-medium"
@@ -76,11 +89,6 @@ const Header = ({ onAskQuestion, onSearch, onProfileClick, onAdminClick }: Heade
               
               {isLoggedIn ? (
                 <>
-                  <Button variant="ghost" size="sm" className="relative">
-                    <Bell className="h-5 w-5" />
-                    <span className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full"></span>
-                  </Button>
-                  
                   {isAdmin && (
                     <Button 
                       variant="ghost" 
@@ -139,6 +147,13 @@ const Header = ({ onAskQuestion, onSearch, onProfileClick, onAdminClick }: Heade
                   onChange={handleSearchChange}
                 />
               </form>
+              
+              {isLoggedIn && (
+                <div className="flex justify-center">
+                  <NotificationDropdown />
+                </div>
+              )}
+              
               <Button 
                 onClick={onAskQuestion}
                 className="w-full bg-black text-white hover:bg-gray-900"

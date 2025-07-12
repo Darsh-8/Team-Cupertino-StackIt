@@ -39,6 +39,12 @@ const App = () => {
     setCurrentView('admin');
   };
 
+  const handleHomeClick = () => {
+    setCurrentView('home');
+    setSelectedQuestionId(null);
+    setSearchQuery('');
+  };
+
   const handleBack = () => {
     setCurrentView('home');
     setSelectedQuestionId(null);
@@ -89,6 +95,7 @@ const App = () => {
               onSearch={handleSearch}
               onProfileClick={handleProfileClick}
               onAdminClick={handleAdminClick}
+              onHomeClick={handleHomeClick}
             />
             <main>
               {renderCurrentView()}

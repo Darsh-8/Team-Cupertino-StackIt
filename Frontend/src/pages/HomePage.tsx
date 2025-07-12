@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Pagination,
@@ -11,6 +11,7 @@ import {
 import FilterBar from '@/components/questions/FilterBar';
 import QuestionCard from '@/components/questions/QuestionCard';
 import { mockQuestions } from '@/data/mockData';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface HomePageProps {
   onAskQuestion?: () => void;
@@ -21,27 +22,22 @@ interface HomePageProps {
 const QUESTIONS_PER_PAGE = 10;
 
 const HomePage = ({ onAskQuestion, onQuestionClick, searchQuery = '' }: HomePageProps) => {
-  const [questions, setQuestions] = useState(mockQuestions);
+  const { questions: contextQuestions } = useAuth();
   const [currentFilter, setCurrentFilter] = useState('Newest');
   const [currentSort, setCurrentSort] = useState('Recent');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedTag, setSelectedTag] = useState('All');
   const [currentPage, setCurrentPage] = useState(1);
 
+  // Combine mock questions with real-time questions from context
+  const allQuestions = useMemo(() => {
+    return [...contextQuestions, ...mockQuestions];
+  }, [contextQuestions]);
+
   // Simple vote handler - just update the vote count
   const handleVote = (questionId: string, voteType: 'up' | 'down', newVoteCount: number) => {
-    setQuestions(prevQuestions => 
-      prevQuestions.map(question => {
-        if (question.id === questionId) {
-          console.log(`Vote ${voteType} on question: ${question.title}, new count: ${newVoteCount}`);
-          return {
-            ...question,
-            votes: newVoteCount
-          };
-        }
-        return question;
-      })
-    );
+    console.log(`Vote ${voteType} on question ID: ${questionId}, new count: ${newVoteCount}`);
+    // Note: For real implementation, this would update the question in the backend
   };
 
   // Auto-categorize questions based on their content/tags
@@ -64,7 +60,7 @@ const HomePage = ({ onAskQuestion, onQuestionClick, searchQuery = '' }: HomePage
 
   // Filter and sort questions
   const filteredQuestions = useMemo(() => {
-    let filtered = [...questions];
+    let filtered = [...allQuestions];
 
     // Apply search filter
     if (searchQuery.trim()) {
@@ -117,7 +113,7 @@ const HomePage = ({ onAskQuestion, onQuestionClick, searchQuery = '' }: HomePage
     }
 
     return filtered;
-  }, [questions, currentFilter, currentSort, selectedCategory, selectedTag, searchQuery]);
+  }, [allQuestions, currentFilter, currentSort, selectedCategory, selectedTag, searchQuery]);
 
   // Calculate pagination
   const totalPages = Math.ceil(filteredQuestions.length / QUESTIONS_PER_PAGE);
