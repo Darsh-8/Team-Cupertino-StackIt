@@ -32,7 +32,7 @@ A modern question and answer platform built with React, TypeScript, and Tailwind
 1. Clone the repository:
 ```bash
 git clone <repository-url>
-cd qa-platform
+cd Frontend
 ```
 
 2. Install dependencies:
